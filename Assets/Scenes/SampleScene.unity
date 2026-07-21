@@ -564,6 +564,7 @@ GameObject:
   - component: {fileID: 501597736}
   - component: {fileID: 501597735}
   - component: {fileID: 501597737}
+  - component: {fileID: 501597738}
   m_Layer: 0
   m_Name: LoseHole
   m_TagString: Untagged
@@ -674,12 +675,24 @@ CircleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.5
+  m_Radius: 0.25
+--- !u!114 &501597738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501597734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49ce5aab5f4c240ae950afc27c8aa0ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IceColdBeer.Core.LoseHole
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -913,6 +926,7 @@ GameObject:
   - component: {fileID: 694700100}
   - component: {fileID: 694700103}
   - component: {fileID: 694700102}
+  - component: {fileID: 694700104}
   m_Layer: 0
   m_Name: PlayerBall
   m_TagString: Untagged
@@ -1056,6 +1070,18 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &694700104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694700099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d66110717fcc3463e8998fa8fb7bdede, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IceColdBeer.Core.BallDamageable
 --- !u!1 &897652878
 GameObject:
   m_ObjectHideFlags: 0
