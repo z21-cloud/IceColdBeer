@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using IceColdBeer.Factories;
 using UnityEngine;
 
-namespace IceColdBeer.Core
+namespace IceColdBeer.Pools
 {
     public class ObjectPooling<T> where T : MonoBehaviour
     {

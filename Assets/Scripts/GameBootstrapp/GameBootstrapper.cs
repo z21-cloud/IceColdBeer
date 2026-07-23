@@ -1,0 +1,17 @@
+using IceColdBeer.Core;
+using IceColdBeer.PlayerInput;
+using UnityEngine;
+
+namespace IceColdBeer.GameStarter
+{
+    public class GameBootstrapper : MonoBehaviour
+    {
+        [SerializeField] private InputManager _inputManager;
+        [SerializeField] private PlatformMover _platformMover;
+
+        private void Awake() 
+        {
+            _platformMover.Initialize(_inputManager);    
+        }
+    }
+}
