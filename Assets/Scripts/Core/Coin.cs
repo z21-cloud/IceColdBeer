@@ -6,7 +6,11 @@ namespace IceColdBeer.Core
 {
     public class Coin : MonoBehaviour, IPickable
     {
+        [SerializeField] private int value = 1;
         private CoinPool _coinPool;
+
+        public int Value => value;
+
         public void Initialize(CoinPool coinPool)
         {
             _coinPool = coinPool;
