@@ -14,6 +14,7 @@ namespace IceColdBeer.GameStarter
         private void Awake()
         {
             _ballPickable.Initailize(_scoreManager);
+            _platformMover.Initialize(_inputManager);
         }
     }
 }

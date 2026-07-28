@@ -257,6 +257,7 @@ GameObject:
   - component: {fileID: 192892349}
   - component: {fileID: 192892348}
   - component: {fileID: 192892350}
+  - component: {fileID: 192892351}
   m_Layer: 0
   m_Name: Platform
   m_TagString: Untagged
@@ -331,8 +332,8 @@ Transform:
   m_GameObject: {fileID: 192892347}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: -4.2606, z: 0}
-  m_LocalScale: {x: 17.45531, y: 0.4788, z: 1}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalScale: {x: 5.5, y: 0.4788, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -383,6 +384,22 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &192892351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 192892347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fa17eb4c9601495588275d81b73f602, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IceColdBeer.Core.PlatformMover
+  _speed: 5
+  _minHeight: -5
+  _maxHeight: 5
+  _maxDiff: 1.5
 --- !u!1 &230705332
 GameObject:
   m_ObjectHideFlags: 0
@@ -443,7 +460,7 @@ Transform:
   m_GameObject: {fileID: 254569024}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9.35, y: 0.03000021, z: 0}
+  m_LocalPosition: {x: -3.3500004, y: 0.03000021, z: 0}
   m_LocalScale: {x: 1, y: 10, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -551,7 +568,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1, y: 50}
   m_EdgeRadius: 0
 --- !u!1 &501597734
 GameObject:
@@ -824,7 +841,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: 4.66, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1002,7 +1019,7 @@ Transform:
   m_GameObject: {fileID: 694700099}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.23, y: -3.28, z: 0}
+  m_LocalPosition: {x: 2.28, y: 0.93, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1169,7 +1186,7 @@ Transform:
   m_GameObject: {fileID: 897652878}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.3, y: 0.03000021, z: 0}
+  m_LocalPosition: {x: 3.3000002, y: 0.03000021, z: 0}
   m_LocalScale: {x: 1, y: 10, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1219,7 +1236,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1, y: 50}
   m_EdgeRadius: 0
 --- !u!212 &897652881
 SpriteRenderer:
@@ -1368,7 +1385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IceColdBeer.GameStarter.GameBootstrapper
   _inputManager: {fileID: 1176635826}
-  _platformMover: {fileID: 0}
+  _platformMover: {fileID: 192892351}
   _ballPickable: {fileID: 694700105}
   _scoreManager: {fileID: 1783297105}
 --- !u!1 &1783297103
