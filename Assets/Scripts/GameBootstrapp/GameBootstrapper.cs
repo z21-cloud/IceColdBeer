@@ -10,11 +10,13 @@ namespace IceColdBeer.GameStarter
         [SerializeField] private PlatformMover _platformMover;
         [SerializeField] private BallPickable _ballPickable;
         [SerializeField] private ScoreManager _scoreManager;
+        [SerializeField] private UIManager _uiManager;
 
         private void Awake()
         {
             _ballPickable.Initailize(_scoreManager);
             _platformMover.Initialize(_inputManager);
+            _uiManager.Intitialize(_scoreManager);
         }
     }
 }

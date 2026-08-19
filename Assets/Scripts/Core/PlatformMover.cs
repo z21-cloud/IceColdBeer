@@ -46,7 +46,6 @@ namespace IceColdBeer.Core
             float centerHeight = (_leftHeight + _rightHeight) / 2f;
             transform.position = new Vector3(transform.position.x, centerHeight, 0f);
 
-            // tan between 2 floats
             float angle = Mathf.Atan2(_rightHeight - _leftHeight, _platromLength) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0, 0, angle);
         }

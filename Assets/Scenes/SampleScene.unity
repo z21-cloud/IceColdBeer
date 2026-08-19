@@ -397,8 +397,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IceColdBeer.Core.PlatformMover
   _speed: 5
-  _minHeight: -5
-  _maxHeight: 5
+  _minHeight: -0.5
+  _maxHeight: 10
   _maxDiff: 1.5
 --- !u!1 &230705332
 GameObject:
@@ -1388,6 +1388,7 @@ MonoBehaviour:
   _platformMover: {fileID: 192892351}
   _ballPickable: {fileID: 694700105}
   _scoreManager: {fileID: 1783297105}
+  _uiManager: {fileID: 1783297106}
 --- !u!1 &1783297103
 GameObject:
   m_ObjectHideFlags: 0
@@ -1398,6 +1399,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1783297104}
   - component: {fileID: 1783297105}
+  - component: {fileID: 1783297106}
   m_Layer: 0
   m_Name: ScoreManager
   m_TagString: Untagged
@@ -1432,6 +1434,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61ae247f072e74cc4b9fe62ab46e574a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+--- !u!114 &1783297106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783297103}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb1d743cbc073409f97db0a0f5676199, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIManager
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
