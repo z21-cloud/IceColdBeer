@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace IceColdBeer.Core
@@ -6,5 +7,6 @@ namespace IceColdBeer.Core
     {
         public int CurrentScore { get; }
         public void AddScore(int amount);
+        public event Action OnCoinPickedUp;
     }
 }

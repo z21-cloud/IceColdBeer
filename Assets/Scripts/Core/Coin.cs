@@ -19,7 +19,9 @@ namespace IceColdBeer.Core
         public void PickUp()
         {
             Debug.Log("Coin picked up");
-            _coinPool.ReleaseCoin(this);
+            
+            Destroy(gameObject);
+            //_coinPool.ReleaseCoin(this);
         }
     }
 }
