@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using IceColdBeer.Core;
 using IceColdBeer.Factories;
 using UnityEngine;
@@ -9,6 +10,7 @@ namespace IceColdBeer.Pools
         [SerializeField] private Coin coin;
         [SerializeField] private int poolSize;
         [SerializeField] private Transform parent;
+        [SerializeField] private List<Transform> spawnPoints;
     
         private ObjectPooling<Coin> pool;
 
@@ -16,6 +18,20 @@ namespace IceColdBeer.Pools
         {
             var factory = new CoinFactory(coin, this, parent);
             pool = new ObjectPooling<Coin>(factory, poolSize);
+
+            if(spawnPoints.Count == 0)
+            {
+                Debug.LogWarning($"[CoinPool] No spawn points!");
+            }
+
+            foreach(var spawnPoint in spawnPoints)
+            {
+                var coin = GetCoin();
+                if(coin != null)
+                {
+                    coin.transform.position = spawnPoint.position;
+                }
+            }
         }
 
         public Coin GetCoin()
