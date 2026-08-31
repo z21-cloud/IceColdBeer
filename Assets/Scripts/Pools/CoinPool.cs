@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace IceColdBeer.Pools
 {
-    public class CoinPool : MonoBehaviour
+    public class CoinPool : MonoBehaviour, ICoinCounter
     {
         [SerializeField] private Coin coin;
         [SerializeField] private int poolSize;
@@ -14,6 +14,8 @@ namespace IceColdBeer.Pools
     
         private ObjectPooling<Coin> pool;
 
+        public int CoinsCount { get; private set; }
+
         private void Awake() 
         {
             var factory = new CoinFactory(coin, this, parent);
@@ -21,9 +23,11 @@ namespace IceColdBeer.Pools
 
             if(spawnPoints.Count == 0)
             {
+                CoinsCount = 0;
                 Debug.LogWarning($"[CoinPool] No spawn points!");
             }
 
+            CoinsCount = spawnPoints.Count;
             foreach(var spawnPoint in spawnPoints)
             {
                 var coin = GetCoin();
@@ -32,6 +36,8 @@ namespace IceColdBeer.Pools
                     coin.transform.position = spawnPoint.position;
                 }
             }
+
+            Debug.Log($"[CoinPool] Initialized with {poolSize} coins.");
         }
 
         public Coin GetCoin()

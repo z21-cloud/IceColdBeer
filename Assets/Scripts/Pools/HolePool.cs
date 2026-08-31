@@ -32,6 +32,8 @@ namespace IceColdBeer.Pools
                     hole.transform.position = spawnPoint.position;
                 }
             }
+
+            Debug.Log($"[HolePool] Initialized with {poolSize} holes.");
         }
 
         public LoseHole GetHole()
