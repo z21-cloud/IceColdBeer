@@ -18,7 +18,6 @@ namespace IceColdBeer.Core
         private void Awake()
         {
             _platromLength = transform.localScale.x;
-            Debug.Log(_platromLength);
         }
 
         public void Initialize(IInputReader inputReader)

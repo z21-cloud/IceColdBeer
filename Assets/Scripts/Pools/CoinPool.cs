@@ -49,10 +49,14 @@ namespace IceColdBeer.Pools
             return null;
         }
 
+        public List<Transform> GetSpawnPoints()
+        {
+            return spawnPoints;
+        }
+
         public void ReleaseCoin(Coin coin)
         {
             pool.Release(coin);
         }
-    
     }
 }
