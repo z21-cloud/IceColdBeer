@@ -10,28 +10,13 @@ namespace IceColdBeer.Pools
         [SerializeField] private LoseHole hole;
         [SerializeField] private int poolSize;
         [SerializeField] private Transform parent;
-        // [SerializeField] private List<Transform> spawnPoints;
 
         private ObjectPooling<LoseHole> pool;
 
         private void Awake()
         {
-            var factory = new LoseHoleFactory(hole, this, parent);
+            var factory = new LoseHoleFactory(hole, parent);
             pool = new ObjectPooling<LoseHole>(factory, poolSize);
-
-            /*if(spawnPoints.Count == 0)
-            {
-                Debug.LogWarning($"[HolePool] No spawn points!");
-            }
-
-            foreach(var spawnPoint in spawnPoints)
-            {
-                var hole = GetHole();
-                if(hole != null)
-                {
-                    hole.transform.position = spawnPoint.position;
-                }
-            }*/
 
             Debug.Log($"[HolePool] Initialized with {poolSize} holes.");
         }

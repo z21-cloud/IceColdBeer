@@ -1,25 +1,57 @@
+using System;
 using System.Collections.Generic;
+using IceColdBeer.Core;
 using IceColdBeer.Pools;
 using UnityEngine;
 
 namespace IceColdBeer.Level
 {
-    public class LevelGenerator : MonoBehaviour
+    public class LevelGenerator : MonoBehaviour, ICoinCounter
     {
+        //[NOTE]: numbers to data driven scriptable object for level generation
+        [Header("Spawn Area")]
         [SerializeField] private SpriteRenderer _spawnArea;
-        [SerializeField] private int _numberOfHoles = 10;
-        [SerializeField] private float _minDistanceBetweenHoles = .25f;
-        [SerializeField] private float _minDistanceBetweenPlayer = .25f;
-        [SerializeField] private float _minDistanceBetweenCoins = 1f;
-        [SerializeField] private HolePool _holePool;
-        [SerializeField] private CoinPool _coinPool;
+        [SerializeField] private float _borderOffset = 0.35f;
+        
+        [Header("Lose Holes")]
+        [SerializeField] private int _loseHoleCount = 10;
+        [SerializeField] private float _minDistanceBetweenLoseHoles = .25f;
+        
+        [Header("Player Spawn Position")]
         [SerializeField] private Transform _playerSpawnPosition;
+        [SerializeField] private float _minDistanceBetweenPlayer = .25f;
+       
+        [Header("Win Hole")]
+        [SerializeField] private float _minDistanceBetweenWinHole = .25f;
+       
+        [Header("Coins")]
+        [SerializeField] private int _coinsCount = 2;
+        [SerializeField] private float _minDistanceBetweenCoins = 1f;
+        
+        // pools
+        private CoinPool _coinPool;
+        private HolePool _loseHolePool;
+        private WinHolePool _winHolePool;
 
+        // area bounds and spawned positions
         private Bounds _spawnAreaBounds;
-        private Vector2 _spawnAreaMin;
-        private Vector2 _spawnAreaMax;
-        private List<Vector2> _spawnedPositions;
-        private List<Transform> _spawnedCoins;
+        private List<Vector2> _spawnedPositionsLoseHole;
+        private List<Vector2> _spawnedPositionsCoins;
+        private Vector2 _winHolePosition;
+
+        public int CoinsCount => _coinsCount;
+
+        public void Initailize(HolePool loseHolePool, 
+                            CoinPool coinPool, 
+                            WinHolePool winHolePool, 
+                            IScoreCounter scoreCounter)
+        {
+            _loseHolePool = loseHolePool;
+            _coinPool = coinPool;
+            _winHolePool = winHolePool;
+
+            _winHolePool.Initialize(scoreCounter, this);
+        }
 
         private void Awake()
         {
@@ -29,64 +61,133 @@ namespace IceColdBeer.Level
                 return;
             }
 
-            if (_holePool == null)
+            if (_loseHolePool == null)
             {
                 Debug.LogError($"[LevelGenerator] Hole Pool is not assigned!");
                 return;
             }
 
-            _spawnedPositions = new();
-            _spawnedCoins = new();
-            _spawnedCoins = _coinPool.GetSpawnPoints();
+            if(_coinPool == null)
+            {
+                Debug.LogError($"[LevelGenerator] Coin Pool is not assigned!");
+                return;
+            }
+
+            _spawnAreaBounds = _spawnArea.bounds;
+
+            _spawnedPositionsCoins = new();
+            _spawnedPositionsLoseHole = new();
 
             GenerateLevel();
         }
 
         private void GenerateLevel()
         {
-            _spawnAreaBounds = _spawnArea.bounds;
-            _spawnAreaMin = _spawnAreaBounds.min;
-            _spawnAreaMax = _spawnAreaBounds.max;
+            GenerateWinHole();
+            GenerateCoins();
+            GenerateLoseHoles();
+        }
 
-            for (int i = 0; i < _numberOfHoles; i++)
+        private void GenerateWinHole()
+        {
+            var winHole = _winHolePool.GetHole();
+            if(winHole != null)
             {
-                var hole = _holePool.GetHole();
-                if (hole != null)
+                winHole.transform.position = GetRandomPositionInSpawnArea();
+                _winHolePosition = winHole.transform.position;
+            }
+            else
+            {
+                Debug.LogWarning($"[LevelGenerator] Win Hole Pool is empty, cannot generate win hole!");
+            }
+        }
+
+        private void GenerateCoins()
+        {
+            for(int i = 0; i < _coinsCount; i++)
+            {
+                var coin = _coinPool.GetCoin();
+                if(coin != null)
                 {
-                    hole.transform.position = GetRandomPositionInSpawnArea();
+                    coin.transform.position = GetRandomPositionInSpawnArea();
+                    _spawnedPositionsCoins.Add(coin.transform.position);
                 }
             }
         }
 
-        private Vector2 GetRandomPositionInSpawnArea()
+        private void GenerateLoseHoles()
         {
-            float randomX = UnityEngine.Random.Range(_spawnAreaMin.x, _spawnAreaMax.x);
-            float randomY = UnityEngine.Random.Range(_spawnAreaMin.y, _spawnAreaMax.y);
-            Vector2 vector2 = new Vector2(randomX, randomY);
-
-            if (Vector2.Distance(_playerSpawnPosition.position, vector2) < _minDistanceBetweenPlayer)
+            for (int i = 0; i < _loseHoleCount; i++)
             {
-                return GetRandomPositionInSpawnArea();
-            }
-
-            foreach (var pos in _spawnedCoins)
-            {
-                if (Vector2.Distance(pos.position, vector2) < _minDistanceBetweenCoins)
+                var hole = _loseHolePool.GetHole();
+                if (hole != null)
                 {
-                    return GetRandomPositionInSpawnArea();
+                    hole.transform.position = GetRandomPositionInSpawnArea();
+                    _spawnedPositionsLoseHole.Add(hole.transform.position);
+                }
+            }
+        }
+
+        private Vector2 GetRandomPositionInSpawnArea(int maxAttempts = 1000)
+        {
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                Vector2 randomPosition = GenerateRandomPosition();
+                if (IsValidPosition(randomPosition))
+                {
+                    return randomPosition;
                 }
             }
 
-            foreach (var pos in _spawnedPositions)
+            Debug.LogWarning($"[LevelGenerator] Could not find a valid position after {maxAttempts} attempts.");
+
+            return Vector2.zero;
+        }
+
+        private bool IsValidPosition(Vector2 position)
+        {
+            if (Vector2.Distance(position, _playerSpawnPosition.position) < _minDistanceBetweenPlayer)
             {
-                if (Vector2.Distance(pos, vector2) < _minDistanceBetweenHoles)
+                return false;
+            }
+
+            if(Vector2.Distance(position, _winHolePosition) < _minDistanceBetweenWinHole)
+            {
+                return false;
+            }
+
+            foreach (var spawnedCoinPosition in _spawnedPositionsCoins)
+            {
+                if (Vector2.Distance(position, spawnedCoinPosition) < _minDistanceBetweenCoins)
                 {
-                    return GetRandomPositionInSpawnArea();
+                    return false;
                 }
             }
 
-            _spawnedPositions.Add(vector2);
-            return vector2;
+            foreach (var spawnedPosition in _spawnedPositionsLoseHole)
+            {
+                if (Vector2.Distance(position, spawnedPosition) < _minDistanceBetweenLoseHoles)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private Vector2 GenerateRandomPosition()
+        {
+            float randomX = UnityEngine.Random.Range(
+                _spawnAreaBounds.min.x + _borderOffset,
+                _spawnAreaBounds.max.x - _borderOffset
+                );
+
+            float randomY = UnityEngine.Random.Range(
+                _spawnAreaBounds.min.y + _borderOffset,
+                _spawnAreaBounds.max.y - _borderOffset
+                );
+            
+            return new Vector2(randomX, randomY);
         }
     }
 }

@@ -5,37 +5,18 @@ using UnityEngine;
 
 namespace IceColdBeer.Pools
 {
-    public class CoinPool : MonoBehaviour, ICoinCounter
+    public class CoinPool : MonoBehaviour
     {
         [SerializeField] private Coin coin;
         [SerializeField] private int poolSize;
         [SerializeField] private Transform parent;
-        [SerializeField] private List<Transform> spawnPoints;
     
         private ObjectPooling<Coin> pool;
-
-        public int CoinsCount { get; private set; }
 
         private void Awake() 
         {
             var factory = new CoinFactory(coin, this, parent);
             pool = new ObjectPooling<Coin>(factory, poolSize);
-
-            if(spawnPoints.Count == 0)
-            {
-                CoinsCount = 0;
-                Debug.LogWarning($"[CoinPool] No spawn points!");
-            }
-
-            CoinsCount = spawnPoints.Count;
-            foreach(var spawnPoint in spawnPoints)
-            {
-                var coin = GetCoin();
-                if(coin != null)
-                {
-                    coin.transform.position = spawnPoint.position;
-                }
-            }
 
             Debug.Log($"[CoinPool] Initialized with {poolSize} coins.");
         }
@@ -47,11 +28,6 @@ namespace IceColdBeer.Pools
     
             Debug.LogWarning($"[CoinPool] Coin Pool is empty, return null!");
             return null;
-        }
-
-        public List<Transform> GetSpawnPoints()
-        {
-            return spawnPoints;
         }
 
         public void ReleaseCoin(Coin coin)

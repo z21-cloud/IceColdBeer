@@ -1,4 +1,5 @@
 using IceColdBeer.Core;
+using IceColdBeer.Level;
 using IceColdBeer.PlayerInput;
 using IceColdBeer.Pools;
 using UnityEngine;
@@ -12,15 +13,20 @@ namespace IceColdBeer.GameStarter
         [SerializeField] private BallPickable _ballPickable;
         [SerializeField] private ScoreManager _scoreManager;
         [SerializeField] private UIManager _uiManager;
-        [SerializeField] private WinHole _winHole;
+        
+        [Header("Pools")]
+        [SerializeField] private WinHolePool _winHolePool;
         [SerializeField] private CoinPool _coinPool;
+        [SerializeField] private HolePool _loseHolePool;
+        [SerializeField] private LevelGenerator _levelGenerator;
 
         private void Awake()
         {
             _ballPickable.Initailize(_scoreManager);
             _platformMover.Initialize(_inputManager);
             _uiManager.Intitialize(_scoreManager);
-            _winHole.Initialize(_scoreManager, _coinPool);
+            
+            _levelGenerator.Initailize(_loseHolePool, _coinPool, _winHolePool, _scoreManager);
         }
     }
 }

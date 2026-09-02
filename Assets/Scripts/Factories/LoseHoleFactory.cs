@@ -8,12 +8,10 @@ namespace IceColdBeer.Factories
     {
         private readonly LoseHole _prefab;
         private readonly Transform _parent;
-        private readonly HolePool _pool;
 
-        public LoseHoleFactory(LoseHole prefab, HolePool pool, Transform parent = null)
+        public LoseHoleFactory(LoseHole prefab, Transform parent = null)
         {
             _prefab = prefab;
-            _pool = pool;
             _parent = parent;
         }
 
