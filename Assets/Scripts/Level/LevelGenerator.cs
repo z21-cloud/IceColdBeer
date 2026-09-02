@@ -88,12 +88,13 @@ namespace IceColdBeer.Level
             GenerateLoseHoles();
         }
 
+        #region GENERATOR:WIN HOLE POSITION
         private void GenerateWinHole()
         {
             var winHole = _winHolePool.GetHole();
             if(winHole != null)
             {
-                winHole.transform.position = GetRandomPositionInSpawnArea();
+                winHole.transform.position = GetRandomPositionWinHole();
                 _winHolePosition = winHole.transform.position;
             }
             else
@@ -102,6 +103,35 @@ namespace IceColdBeer.Level
             }
         }
 
+        private Vector2 GetRandomPositionWinHole(int maxAttempts = 1000)
+        {
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                Vector2 randomPosition = GenerateRandomPosition();
+                if (IsValidWinHolePosition(randomPosition))
+                {
+                    return randomPosition;
+                }
+            }
+
+            Debug.LogWarning($"[LevelGenerator] Could not find a valid position for win hole after {maxAttempts} attempts.");
+
+            return Vector2.zero;
+        }
+
+        // Needs to check distance between player & win hole, because win hole generates first
+        private bool IsValidWinHolePosition(Vector2 position)
+        {
+            if (Vector2.Distance(position, _playerSpawnPosition.position) < _minDistanceBetweenPlayer)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        #endregion
+
+        #region GENERATOR:COIN POSITION
         private void GenerateCoins()
         {
             for(int i = 0; i < _coinsCount; i++)
@@ -109,12 +139,54 @@ namespace IceColdBeer.Level
                 var coin = _coinPool.GetCoin();
                 if(coin != null)
                 {
-                    coin.transform.position = GetRandomPositionInSpawnArea();
+                    coin.transform.position = GetRandomPositionCoin();
                     _spawnedPositionsCoins.Add(coin.transform.position);
                 }
             }
         }
 
+        private Vector2 GetRandomPositionCoin(int maxAttempts = 1000)
+        {
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                Vector2 randomPosition = GenerateRandomPosition();
+                if (IsValidPositionCoin(randomPosition))
+                {
+                    return randomPosition;
+                }
+            }
+
+            Debug.LogWarning($"[LevelGenerator] Could not find a valid position for coin after {maxAttempts} attempts.");
+
+            return Vector2.zero;
+        }
+
+        // Need to check distance between player & win hole and other coins
+        private bool IsValidPositionCoin(Vector2 position)
+        {
+            if (Vector2.Distance(position, _playerSpawnPosition.position) < _minDistanceBetweenPlayer)
+            {
+                return false;
+            }
+
+            if(Vector2.Distance(position, _winHolePosition) < _minDistanceBetweenWinHole)
+            {
+                return false;
+            }
+
+            foreach (var spawnedCoinPosition in _spawnedPositionsCoins)
+            {
+                if (Vector2.Distance(position, spawnedCoinPosition) < _minDistanceBetweenCoins)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        #endregion
+
+        #region  GENERATOR:LOSE HOLE POSIION
         private void GenerateLoseHoles()
         {
             for (int i = 0; i < _loseHoleCount; i++)
@@ -122,29 +194,30 @@ namespace IceColdBeer.Level
                 var hole = _loseHolePool.GetHole();
                 if (hole != null)
                 {
-                    hole.transform.position = GetRandomPositionInSpawnArea();
+                    hole.transform.position = GetRandomPositionLoseHole();
                     _spawnedPositionsLoseHole.Add(hole.transform.position);
                 }
             }
         }
 
-        private Vector2 GetRandomPositionInSpawnArea(int maxAttempts = 1000)
+        private Vector2 GetRandomPositionLoseHole(int maxAttempts = 1000)
         {
             for (int i = 0; i < maxAttempts; i++)
             {
                 Vector2 randomPosition = GenerateRandomPosition();
-                if (IsValidPosition(randomPosition))
+                if (IsValidPositionLoseHole(randomPosition))
                 {
                     return randomPosition;
                 }
             }
 
-            Debug.LogWarning($"[LevelGenerator] Could not find a valid position after {maxAttempts} attempts.");
+            Debug.LogWarning($"[LevelGenerator] Could not find a valid position for lose hole after {maxAttempts} attempts.");
 
             return Vector2.zero;
         }
 
-        private bool IsValidPosition(Vector2 position)
+        // Need to check distance between player, win hole, coins & other lose holes
+        private bool IsValidPositionLoseHole(Vector2 position)
         {
             if (Vector2.Distance(position, _playerSpawnPosition.position) < _minDistanceBetweenPlayer)
             {
@@ -174,7 +247,9 @@ namespace IceColdBeer.Level
 
             return true;
         }
+        #endregion
 
+        // gets random position inside bounderies + border offset
         private Vector2 GenerateRandomPosition()
         {
             float randomX = UnityEngine.Random.Range(
