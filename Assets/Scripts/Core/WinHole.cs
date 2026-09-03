@@ -1,23 +1,17 @@
-using IceColdBeer.Core;
+using System;
 using UnityEngine;
 
 namespace IceColdBeer.Core
 {
     public class WinHole : MonoBehaviour
     {
-        private IScoreCounter _scoreCounter;
-        private ICoinCounter _coinCounter;
-        public void Initialize(IScoreCounter scoreCounter, ICoinCounter coinCounter)
-        {
-            _scoreCounter = scoreCounter;
-            _coinCounter = coinCounter;
-        }
+        public event Action OnPlayerWon;
 
         private void OnTriggerEnter2D(Collider2D other) 
         {
-            if(_scoreCounter.CurrentScore == _coinCounter.CoinsCount)
+            if(other.TryGetComponent<BallPickable>(out var ballPickable))
             {
-                Debug.Log($"Player wins!");
+                OnPlayerWon?.Invoke();
             }
         }
     }

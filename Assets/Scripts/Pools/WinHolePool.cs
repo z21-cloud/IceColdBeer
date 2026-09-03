@@ -11,15 +11,10 @@ namespace IceColdBeer.Pools
         [SerializeField] private Transform parent;
 
         private ObjectPooling<WinHole> pool;
-        private IScoreCounter _scoreCounter;
-        private ICoinCounter _coinCounter;
 
-        public void Initialize(IScoreCounter scoreCounter, ICoinCounter coinCounter)
+        private void Awake()
         {
-            _scoreCounter = scoreCounter;
-            _coinCounter = coinCounter;
-
-            var factory = new WinHoleFactory(hole, _scoreCounter, _coinCounter, parent);
+            var factory = new WinHoleFactory(hole, parent);
             pool = new ObjectPooling<WinHole>(factory, poolSize);
 
             Debug.Log($"[WinHolePool] Initialized with {poolSize} win holes.");

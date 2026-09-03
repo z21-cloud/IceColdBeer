@@ -8,5 +8,6 @@ namespace IceColdBeer.Core
         public int CurrentScore { get; }
         public void AddScore(int amount);
         public event Action OnCoinPickedUp;
+        public void Subscribe(WinHole winHole, int coinsCount);
     }
 }

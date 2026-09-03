@@ -33,6 +33,9 @@ namespace IceColdBeer.Level
         private HolePool _loseHolePool;
         private WinHolePool _winHolePool;
 
+        //
+        private IScoreCounter _scoreCounter;
+
         // area bounds and spawned positions
         private Bounds _spawnAreaBounds;
         private List<Vector2> _spawnedPositionsLoseHole;
@@ -49,8 +52,7 @@ namespace IceColdBeer.Level
             _loseHolePool = loseHolePool;
             _coinPool = coinPool;
             _winHolePool = winHolePool;
-
-            _winHolePool.Initialize(scoreCounter, this);
+            _scoreCounter = scoreCounter;
         }
 
         private void Awake()
@@ -94,6 +96,7 @@ namespace IceColdBeer.Level
             var winHole = _winHolePool.GetHole();
             if(winHole != null)
             {
+                _scoreCounter.Subscribe(winHole, _coinsCount);
                 winHole.transform.position = GetRandomPositionWinHole();
                 _winHolePosition = winHole.transform.position;
             }
