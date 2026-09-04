@@ -1283,7 +1283,7 @@ Transform:
   m_GameObject: {fileID: 694700099}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.28, y: 0.93, z: 0}
+  m_LocalPosition: {x: 0.38, y: 0.75, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1871,6 +1871,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IceColdBeer.Level.LevelGenerator
   _spawnArea: {fileID: 131478672}
   _borderOffset: 0.35
+  _difficultyLevel: 1
   _loseHoleCount: 10
   _minDistanceBetweenLoseHoles: 1.5
   _playerSpawnPosition: {fileID: 694700101}

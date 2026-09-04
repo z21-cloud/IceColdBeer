@@ -12,6 +12,7 @@ namespace IceColdBeer.Level
         [Header("Spawn Area")]
         [SerializeField] private SpriteRenderer _spawnArea;
         [SerializeField] private float _borderOffset = 0.35f;
+        [SerializeField] private int _difficultyLevel = 0;
         
         [Header("Lose Holes")]
         [SerializeField] private int _loseHoleCount = 10;
@@ -41,6 +42,12 @@ namespace IceColdBeer.Level
         private List<Vector2> _spawnedPositionsLoseHole;
         private List<Vector2> _spawnedPositionsCoins;
         private Vector2 _winHolePosition;
+
+        // private variables
+        private float _currentMinYSpawnPosition = 0f;
+
+        // consts
+        private const float _minYSpawnPosition = 0.75f;
 
         public int CoinsCount => _coinsCount;
 
@@ -110,7 +117,8 @@ namespace IceColdBeer.Level
         {
             for (int i = 0; i < maxAttempts; i++)
             {
-                Vector2 randomPosition = GenerateRandomPosition();
+                float yDifficultyOffset = ApplyDifficultyOffset(_difficultyLevel);
+                Vector2 randomPosition = GenerateRandomPosition(yDifficultyOffset);
                 if (IsValidWinHolePosition(randomPosition))
                 {
                     return randomPosition;
@@ -120,6 +128,13 @@ namespace IceColdBeer.Level
             Debug.LogWarning($"[LevelGenerator] Could not find a valid position for win hole after {maxAttempts} attempts.");
 
             return Vector2.zero;
+        }
+
+        private float ApplyDifficultyOffset(int difficultyLevel)
+        {
+            _currentMinYSpawnPosition = _minYSpawnPosition + (difficultyLevel * 0.5f);
+            _currentMinYSpawnPosition = Mathf.Clamp(_currentMinYSpawnPosition, _minYSpawnPosition, _spawnAreaBounds.max.y - _borderOffset);
+            return _currentMinYSpawnPosition;
         }
 
         // Needs to check distance between player & win hole, because win hole generates first
@@ -152,7 +167,7 @@ namespace IceColdBeer.Level
         {
             for (int i = 0; i < maxAttempts; i++)
             {
-                Vector2 randomPosition = GenerateRandomPosition();
+                Vector2 randomPosition = GenerateRandomPosition(0);
                 if (IsValidPositionCoin(randomPosition))
                 {
                     return randomPosition;
@@ -207,7 +222,7 @@ namespace IceColdBeer.Level
         {
             for (int i = 0; i < maxAttempts; i++)
             {
-                Vector2 randomPosition = GenerateRandomPosition();
+                Vector2 randomPosition = GenerateRandomPosition(0);
                 if (IsValidPositionLoseHole(randomPosition))
                 {
                     return randomPosition;
@@ -253,7 +268,7 @@ namespace IceColdBeer.Level
         #endregion
 
         // gets random position inside bounderies + border offset
-        private Vector2 GenerateRandomPosition()
+        private Vector2 GenerateRandomPosition(float minYPosition = _minYSpawnPosition)
         {
             float randomX = UnityEngine.Random.Range(
                 _spawnAreaBounds.min.x + _borderOffset,
@@ -261,10 +276,10 @@ namespace IceColdBeer.Level
                 );
 
             float randomY = UnityEngine.Random.Range(
-                _spawnAreaBounds.min.y + _borderOffset,
+                minYPosition,
                 _spawnAreaBounds.max.y - _borderOffset
                 );
-            
+        
             return new Vector2(randomX, randomY);
         }
     }
