@@ -29,6 +29,9 @@ namespace IceColdBeer.Level
         [SerializeField] private int _coinsCount = 2;
         [SerializeField] private float _minDistanceBetweenCoins = 1f;
         
+        [Header("Seed")]
+        [SerializeField] private int _seed = 0;
+        
         // pools
         private CoinPool _coinPool;
         private HolePool _loseHolePool;
@@ -82,10 +85,14 @@ namespace IceColdBeer.Level
                 return;
             }
 
+
             _spawnAreaBounds = _spawnArea.bounds;
 
             _spawnedPositionsCoins = new();
             _spawnedPositionsLoseHole = new();
+            
+            // Initialize random seed for deterministic level generation before level generation
+            UnityEngine.Random.InitState(_seed);
 
             GenerateLevel();
         }
