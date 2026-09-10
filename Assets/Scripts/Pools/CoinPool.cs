@@ -30,6 +30,11 @@ namespace IceColdBeer.Pools
             return null;
         }
 
+        public List<Coin> GetActiveCoins()
+        {
+            return pool.GetActiveObjects();
+        }
+
         public void ReleaseCoin(Coin coin)
         {
             pool.Release(coin);

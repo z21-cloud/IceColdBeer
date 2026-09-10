@@ -31,7 +31,10 @@ namespace IceColdBeer.Level
         
         [Header("Seed")]
         [SerializeField] private int _seed = 0;
-        
+
+        [Header("Grid Builder")]
+        [SerializeField] private GridBuilder _gridBuilder;
+
         // pools
         private CoinPool _coinPool;
         private HolePool _loseHolePool;
@@ -94,7 +97,17 @@ namespace IceColdBeer.Level
             // Initialize random seed for deterministic level generation before level generation
             UnityEngine.Random.InitState(_seed);
 
-            GenerateLevel();
+
+            _gridBuilder.BuildGrid(_spawnAreaBounds);
+            
+            for(int i = 0; i < 10; i++)
+            {
+                DestroyAllSpawnedObjects();
+                GenerateLevel();
+
+                var nodes = _gridBuilder.Grid;
+                _gridBuilder.UpdateGrid();
+            }
         }
 
         private void GenerateLevel()
@@ -288,6 +301,30 @@ namespace IceColdBeer.Level
                 );
         
             return new Vector2(randomX, randomY);
+        }
+    
+        private void DestroyAllSpawnedObjects()
+        {
+            foreach(var loseHole in _loseHolePool.GetActiveHoles())
+            {
+                _loseHolePool.ReleaseHole(loseHole);
+            }
+            _spawnedPositionsLoseHole.Clear();
+
+
+            foreach(var coin in _coinPool.GetActiveCoins())
+            {
+                _coinPool.ReleaseCoin(coin);
+            }
+            _spawnedPositionsCoins.Clear();
+
+
+
+            foreach(var winHole in _winHolePool.GetActiveWinHoles())
+            {
+                _winHolePool.ReleaseHole(winHole);
+            }
+            _winHolePosition = Vector2.zero;
         }
     }
 }

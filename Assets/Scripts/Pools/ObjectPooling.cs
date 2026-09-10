@@ -41,6 +41,19 @@ namespace IceColdBeer.Pools
             return null;
         }
 
+        public List<T> GetActiveObjects()
+        {
+            List<T> activeObjects = new List<T>();
+            foreach(var obj in _objects)
+            {
+                if(obj.gameObject.activeInHierarchy)
+                {
+                    activeObjects.Add(obj);
+                }
+            }
+            return activeObjects;
+        }
+
         public void Release(T obj)
         {
             obj.gameObject.SetActive(false);

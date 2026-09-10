@@ -30,6 +30,11 @@ namespace IceColdBeer.Pools
             return null;
         }
 
+        public List<LoseHole> GetActiveHoles()
+        {
+            return pool.GetActiveObjects();
+        }
+
         public void ReleaseHole(LoseHole hole)
         {
             pool.Release(hole);

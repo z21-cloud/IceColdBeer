@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using IceColdBeer.Core;
 using IceColdBeer.Factories;
 using UnityEngine;
@@ -27,6 +28,11 @@ namespace IceColdBeer.Pools
 
             Debug.LogWarning($"[WinHolePool] Win Hole Pool is empty, return null!");
             return null;
+        }
+
+        public List<WinHole> GetActiveWinHoles()
+        {
+            return pool.GetActiveObjects();
         }
 
         public void ReleaseHole(WinHole hole)
