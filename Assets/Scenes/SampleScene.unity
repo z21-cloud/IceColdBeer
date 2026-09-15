@@ -176,8 +176,8 @@ Transform:
   m_GameObject: {fileID: 131478670}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.0342, y: 0.01961703, z: 0}
-  m_LocalScale: {x: 5.73175, y: 9.980767, z: 5.3597083}
+  m_LocalPosition: {x: 0.1007, y: 0.2976, z: 0}
+  m_LocalScale: {x: 6.001645, y: 10.536352, z: 5.3597083}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 230705333}
@@ -394,7 +394,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fa17eb4c9601495588275d81b73f602, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IceColdBeer.Core.PlatformMover
-  _speed: 5
+  _speed: 1.5
   _minHeight: 0
   _maxHeight: 8.5
   _maxDiff: 1.5
@@ -425,8 +425,8 @@ Transform:
   m_GameObject: {fileID: 215079672}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.70710677, w: 0.7071068}
-  m_LocalPosition: {x: -0.025000095, y: -5.4900002, z: 0}
-  m_LocalScale: {x: 1, y: 7.75, z: 1}
+  m_LocalPosition: {x: 0.099999905, y: -5.4900002, z: 0}
+  m_LocalScale: {x: 1, y: 8.000325, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 230705333}
@@ -600,8 +600,8 @@ Transform:
   m_GameObject: {fileID: 254569024}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.4, y: 0.01, z: 0}
-  m_LocalScale: {x: 1, y: 10, z: 1}
+  m_LocalPosition: {x: -3.4, y: 0.385, z: 0}
+  m_LocalScale: {x: 1, y: 10.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 230705333}
@@ -1283,7 +1283,7 @@ Transform:
   m_GameObject: {fileID: 694700099}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.38, y: 0.75, z: 0}
+  m_LocalPosition: {x: -2.14, y: 0.75, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1337,7 +1337,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 25
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 1
@@ -1426,7 +1426,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoinPool
   coin: {fileID: 8300797240394408091, guid: dea309f7838af43f78e469eab8e5edb0, type: 3}
-  poolSize: 10
+  poolSize: 100
   parent: {fileID: 67334878}
 --- !u!114 &728093721
 MonoBehaviour:
@@ -1441,7 +1441,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IceColdBeer.Pools.HolePool
   hole: {fileID: 5763243282404417399, guid: 7c556979543cc4147880d790421b337b, type: 3}
-  poolSize: 10
+  poolSize: 100
   parent: {fileID: 814892296}
 --- !u!114 &728093722
 MonoBehaviour:
@@ -1456,7 +1456,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IceColdBeer.Pools.WinHolePool
   hole: {fileID: 5990766421546905396, guid: e7567fd80661fc843b7889aeddda61a2, type: 3}
-  poolSize: 1
+  poolSize: 10
   parent: {fileID: 934356742}
 --- !u!1 &814892295
 GameObject:
@@ -1547,8 +1547,8 @@ Transform:
   m_GameObject: {fileID: 967342553}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.35, y: 0.010000229, z: 0}
-  m_LocalScale: {x: 1, y: 10, z: 1}
+  m_LocalPosition: {x: 3.5971, y: 0.4044237, z: 0}
+  m_LocalScale: {x: 0.9691, y: 10.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 230705333}
@@ -1850,6 +1850,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1403798322}
   - component: {fileID: 1403798321}
+  - component: {fileID: 1403798323}
+  - component: {fileID: 1403798324}
   m_Layer: 0
   m_Name: LevelGenerator
   m_TagString: Untagged
@@ -1871,14 +1873,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IceColdBeer.Level.LevelGenerator
   _spawnArea: {fileID: 131478672}
   _borderOffset: 0.35
-  _difficultyLevel: 1
-  _loseHoleCount: 10
+  _difficultyLevel: 2147483647
+  _loseHoleCount: 13
   _minDistanceBetweenLoseHoles: 1.5
   _playerSpawnPosition: {fileID: 694700101}
   _minDistanceBetweenPlayer: 1.5
   _minDistanceBetweenWinHole: 1.5
   _coinsCount: 2
   _minDistanceBetweenCoins: 1.5
+  _seed: 12345
+  _gridBuilder: {fileID: 1403798323}
+  _bfs: {fileID: 1403798324}
 --- !u!4 &1403798322
 Transform:
   m_ObjectHideFlags: 0
@@ -1894,6 +1899,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1403798323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403798320}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe96e1119f9e56b4d8ef41a3d804b9d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridBuilder
+  nodeSize: 1
+  unwalkableLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!114 &1403798324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403798320}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0431d04ca2f1e4199aea30a4987570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BFS
 --- !u!1 &1484447757
 GameObject:
   m_ObjectHideFlags: 0
@@ -1921,8 +1954,8 @@ Transform:
   m_GameObject: {fileID: 1484447757}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.70710677, w: 0.7071068}
-  m_LocalPosition: {x: -0.025000095, y: 5.5099998, z: 0}
-  m_LocalScale: {x: 1, y: 7.75, z: 1}
+  m_LocalPosition: {x: 0.1, y: 6.09, z: 0}
+  m_LocalScale: {x: 1, y: 8.000325, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 230705333}

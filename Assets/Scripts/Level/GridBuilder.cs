@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridBuilder : MonoBehaviour
@@ -9,6 +10,8 @@ public class GridBuilder : MonoBehaviour
     private const float gridOffset = 0.25f; // Offset to adjust the grid height
     private Vector2 minPosition;
     private Vector2 maxPosition;
+    private int gridWidth;
+    private int gridHeight;
 
     private Node[,] grid;
 
@@ -20,8 +23,8 @@ public class GridBuilder : MonoBehaviour
         minPosition = spawnAreaBounds.min;
         maxPosition = spawnAreaBounds.max;
 
-        int gridWidth = Mathf.FloorToInt((maxPosition.x - minPosition.x) / nodeSize);
-        int gridHeight = Mathf.FloorToInt((maxPosition.y - minPosition.y) / nodeSize);
+        gridWidth = Mathf.FloorToInt((maxPosition.x - minPosition.x) / nodeSize);
+        gridHeight = Mathf.FloorToInt((maxPosition.y - minPosition.y) / nodeSize);
 
         grid = new Node[gridWidth, gridHeight];
 
@@ -39,12 +42,25 @@ public class GridBuilder : MonoBehaviour
         }
     }
 
+    public Node GetNodeAtPosition(Vector2 position)
+    {
+        // Implementation for getting a node at a specific position
+        int x = Mathf.FloorToInt((position.x - minPosition.x) / nodeSize);
+        int y = Mathf.FloorToInt((position.y - gridOffset) / nodeSize);
+
+        if(x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
+        {
+            //Debug.Log($"[GridBuilder] GetNodeAtPosition - x: {x}, y: {y}, position: {position}");
+            return grid[x, y];
+        }
+
+        Debug.LogError($"[GridBuilder] GetNodeAtPosition - Position {position} is out of bounds!");
+        return grid[0, 0]; // Return the first node if the position is out of bounds
+    }
+
     public void UpdateGrid()
     {
         if (grid == null) return;
-
-        int gridWidth = grid.GetLength(0);
-        int gridHeight = grid.GetLength(1);
 
         for(int i = 0; i < gridWidth; i++)
         {
@@ -60,7 +76,7 @@ public class GridBuilder : MonoBehaviour
     private bool CheckIfWalkable(Vector2 nodePosition)
     {
         // Implementation for checking if a node is walkable
-        if(Physics2D.OverlapCircle(nodePosition, nodeSize / 2, unwalkableLayerMask) != null)
+        if(Physics2D.OverlapCircle(nodePosition, nodeSize * 0.35f, unwalkableLayerMask) != null)
         {
             return false; // Node is not walkable if it overlaps with any collider
         }
@@ -71,9 +87,6 @@ public class GridBuilder : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (minPosition == Vector2.zero || maxPosition == Vector2.zero) return;
-
-        int gridWidth = Mathf.FloorToInt((maxPosition.x - minPosition.x) / nodeSize);
-        int gridHeight = Mathf.FloorToInt((maxPosition.y - minPosition.y) / nodeSize);
 
         Gizmos.color = Color.green;
 
@@ -92,7 +105,7 @@ public class GridBuilder : MonoBehaviour
                     Gizmos.color = Color.red; // Non-walkable nodes are red
                 }
 
-                Gizmos.DrawWireCube(nodePosition, new Vector3(nodeSize * 0.75f, nodeSize * 0.75f, 0));
+                Gizmos.DrawWireSphere(nodePosition, nodeSize * 0.35f);
             }
         }
     }

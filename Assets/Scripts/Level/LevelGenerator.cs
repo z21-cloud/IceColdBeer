@@ -35,6 +35,9 @@ namespace IceColdBeer.Level
         [Header("Grid Builder")]
         [SerializeField] private GridBuilder _gridBuilder;
 
+        [Header("BFS Pathfinding")]
+        [SerializeField] private BFS _bfs;
+
         // pools
         private CoinPool _coinPool;
         private HolePool _loseHolePool;
@@ -98,15 +101,54 @@ namespace IceColdBeer.Level
             UnityEngine.Random.InitState(_seed);
 
 
+            GenerateLevel();
+            Physics2D.SyncTransforms();
             _gridBuilder.BuildGrid(_spawnAreaBounds);
             
-            for(int i = 0; i < 10; i++)
+            List<Vector2> goalPositions = new List<Vector2>
             {
-                DestroyAllSpawnedObjects();
-                GenerateLevel();
+                _winHolePosition
+            };
 
-                var nodes = _gridBuilder.Grid;
-                _gridBuilder.UpdateGrid();
+            foreach(var coinPosition in _spawnedPositionsCoins)
+            {
+                goalPositions.Add(coinPosition);
+            }
+
+            // _gridBuilder.UpdateGrid();
+
+            foreach(var goalPosition in goalPositions)
+            {
+                if(IsPathAvailable(_playerSpawnPosition.position, goalPosition))
+                {
+                    // Debug.Log($"[LevelGenerator] Path found between player and goal position: {goalPosition}");
+                }
+                else
+                {
+                    Debug.LogError($"[LevelGenerator] No path found between player and goal position: {goalPosition}");
+                }
+            }
+        }
+
+        private bool IsPathAvailable(Vector3 playerPosition, Vector2 goalPosition)
+        {
+            var startNode = _gridBuilder.GetNodeAtPosition(playerPosition);
+            var targetNode = _gridBuilder.GetNodeAtPosition(goalPosition);
+
+            Debug.Log($"[LG] start: {startNode.gridPosition} walkable={startNode.isWalkable} " + $"nodePos={startNode.position} playerPos={playerPosition}");
+            Debug.Log($"[LG] target: {targetNode.gridPosition} walkable={targetNode.isWalkable} " + $"nodePos={targetNode.position} goalPos={goalPosition}");
+
+            var nodes = _gridBuilder.Grid;
+
+            if(_bfs.FindPath(startNode, targetNode, nodes))
+            {
+                Debug.Log($"[LevelGenerator] Path found between start and target nodes!");
+                return true;
+            }
+            else
+            {
+                Debug.LogError($"[LevelGenerator] No path found between start and target nodes!");
+                return false;
             }
         }
 
@@ -187,7 +229,7 @@ namespace IceColdBeer.Level
         {
             for (int i = 0; i < maxAttempts; i++)
             {
-                Vector2 randomPosition = GenerateRandomPosition(0);
+                Vector2 randomPosition = GenerateRandomPosition(_minYSpawnPosition);
                 if (IsValidPositionCoin(randomPosition))
                 {
                     return randomPosition;
@@ -242,7 +284,7 @@ namespace IceColdBeer.Level
         {
             for (int i = 0; i < maxAttempts; i++)
             {
-                Vector2 randomPosition = GenerateRandomPosition(0);
+                Vector2 randomPosition = GenerateRandomPosition(_minYSpawnPosition);
                 if (IsValidPositionLoseHole(randomPosition))
                 {
                     return randomPosition;
@@ -303,7 +345,7 @@ namespace IceColdBeer.Level
             return new Vector2(randomX, randomY);
         }
     
-        private void DestroyAllSpawnedObjects()
+        /*private void DestroyAllSpawnedObjects()
         {
             foreach(var loseHole in _loseHolePool.GetActiveHoles())
             {
@@ -325,6 +367,6 @@ namespace IceColdBeer.Level
                 _winHolePool.ReleaseHole(winHole);
             }
             _winHolePosition = Vector2.zero;
-        }
+        }*/
     }
 }
