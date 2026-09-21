@@ -32,11 +32,9 @@ namespace IceColdBeer.Level
         [Header("Seed")]
         [SerializeField] private int _seed = 0;
 
-        [Header("Grid Builder")]
-        [SerializeField] private GridBuilder _gridBuilder;
-
-        [Header("BFS Pathfinding")]
-        [SerializeField] private BFS _bfs;
+        [Header("Grid Builder Parameters")]
+        [SerializeField] private float nodeSize = 1f;
+        [SerializeField] private LayerMask unwalkableLayerMask;
 
         // pools
         private CoinPool _coinPool;
@@ -45,12 +43,16 @@ namespace IceColdBeer.Level
 
         //
         private IScoreCounter _scoreCounter;
+        //
+        private BFS _bfs;
+        private GridBuilder _gridBuilder;
 
         // area bounds and spawned positions
         private Bounds _spawnAreaBounds;
         private List<Vector2> _spawnedPositionsLoseHole;
         private List<Vector2> _spawnedPositionsCoins;
         private Vector2 _winHolePosition;
+        private List<Vector2> _goalPositions;
 
         // private variables
         private float _currentMinYSpawnPosition = 0f;
@@ -69,6 +71,9 @@ namespace IceColdBeer.Level
             _coinPool = coinPool;
             _winHolePool = winHolePool;
             _scoreCounter = scoreCounter;
+
+            _bfs = new BFS();
+            _gridBuilder = new GridBuilder(nodeSize, unwalkableLayerMask);
         }
 
         private void Awake()
@@ -105,23 +110,11 @@ namespace IceColdBeer.Level
             Physics2D.SyncTransforms();
             _gridBuilder.BuildGrid(_spawnAreaBounds);
             
-            List<Vector2> goalPositions = new List<Vector2>
-            {
-                _winHolePosition
-            };
-
-            foreach(var coinPosition in _spawnedPositionsCoins)
-            {
-                goalPositions.Add(coinPosition);
-            }
-
-            // _gridBuilder.UpdateGrid();
-
-            foreach(var goalPosition in goalPositions)
+            foreach(var goalPosition in _goalPositions)
             {
                 if(IsPathAvailable(_playerSpawnPosition.position, goalPosition))
                 {
-                    // Debug.Log($"[LevelGenerator] Path found between player and goal position: {goalPosition}");
+                    Debug.Log($"[LevelGenerator] Path found between player and goal position: {goalPosition}");
                 }
                 else
                 {
@@ -132,8 +125,11 @@ namespace IceColdBeer.Level
 
         private bool IsPathAvailable(Vector3 playerPosition, Vector2 goalPosition)
         {
-            var startNode = _gridBuilder.GetNodeAtPosition(playerPosition);
-            var targetNode = _gridBuilder.GetNodeAtPosition(goalPosition);
+            Node startNode;
+            if(_gridBuilder.TryGetNodePosition(playerPosition, out startNode)) {}
+            
+            Node targetNode;
+            if(_gridBuilder.TryGetNodePosition(goalPosition, out targetNode)) {}
 
             Debug.Log($"[LG] start: {startNode.gridPosition} walkable={startNode.isWalkable} " + $"nodePos={startNode.position} playerPos={playerPosition}");
             Debug.Log($"[LG] target: {targetNode.gridPosition} walkable={targetNode.isWalkable} " + $"nodePos={targetNode.position} goalPos={goalPosition}");
@@ -168,6 +164,7 @@ namespace IceColdBeer.Level
                 _scoreCounter.Subscribe(winHole, _coinsCount);
                 winHole.transform.position = GetRandomPositionWinHole();
                 _winHolePosition = winHole.transform.position;
+                _goalPositions.Add(_winHolePosition);
             }
             else
             {
@@ -220,7 +217,9 @@ namespace IceColdBeer.Level
                 if(coin != null)
                 {
                     coin.transform.position = GetRandomPositionCoin();
-                    _spawnedPositionsCoins.Add(coin.transform.position);
+                    Vector2 coinPosition = coin.transform.position;
+                    _spawnedPositionsCoins.Add(coinPosition);
+                    _goalPositions.Add(coinPosition);
                 }
             }
         }
@@ -297,6 +296,7 @@ namespace IceColdBeer.Level
         }
 
         // Need to check distance between player, win hole, coins & other lose holes
+        // remove to separated script
         private bool IsValidPositionLoseHole(Vector2 position)
         {
             if (Vector2.Distance(position, _playerSpawnPosition.position) < _minDistanceBetweenPlayer)
@@ -329,7 +329,8 @@ namespace IceColdBeer.Level
         }
         #endregion
 
-        // gets random position inside bounderies + border offset
+        // gets random position inside bounderies + border offset\
+        // remove to separated script
         private Vector2 GenerateRandomPosition(float minYPosition = _minYSpawnPosition)
         {
             float randomX = UnityEngine.Random.Range(
@@ -344,29 +345,5 @@ namespace IceColdBeer.Level
         
             return new Vector2(randomX, randomY);
         }
-    
-        /*private void DestroyAllSpawnedObjects()
-        {
-            foreach(var loseHole in _loseHolePool.GetActiveHoles())
-            {
-                _loseHolePool.ReleaseHole(loseHole);
-            }
-            _spawnedPositionsLoseHole.Clear();
-
-
-            foreach(var coin in _coinPool.GetActiveCoins())
-            {
-                _coinPool.ReleaseCoin(coin);
-            }
-            _spawnedPositionsCoins.Clear();
-
-
-
-            foreach(var winHole in _winHolePool.GetActiveWinHoles())
-            {
-                _winHolePool.ReleaseHole(winHole);
-            }
-            _winHolePosition = Vector2.zero;
-        }*/
     }
 }

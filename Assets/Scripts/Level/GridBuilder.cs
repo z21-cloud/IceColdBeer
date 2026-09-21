@@ -2,47 +2,53 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GridBuilder : MonoBehaviour
+public class GridBuilder
 {
-    [SerializeField] private float nodeSize;
-    [SerializeField] private LayerMask unwalkableLayerMask;
+    private readonly  float nodeSize;
+    private readonly LayerMask unwalkableLayerMask;
 
-    private const float gridOffset = 0.25f; // Offset to adjust the grid height
+    // contsns
+    private const float gridOffset = 0.25f; // Offset to adjust the Grid height
+
     private Vector2 minPosition;
     private Vector2 maxPosition;
     private int gridWidth;
     private int gridHeight;
 
-    private Node[,] grid;
+    public Node[,] Grid {get; private set;}
 
-    public Node[,] Grid => grid;
+    public GridBuilder(float nodeSize, LayerMask unwalkableLayerMask)
+    {
+        this.nodeSize = nodeSize;
+        this.unwalkableLayerMask = unwalkableLayerMask;
+    }
 
     public void BuildGrid(Bounds spawnAreaBounds)
     {
-        // Implementation for building the grid
+        // Implementation for building the Grid
         minPosition = spawnAreaBounds.min;
         maxPosition = spawnAreaBounds.max;
 
         gridWidth = Mathf.FloorToInt((maxPosition.x - minPosition.x) / nodeSize);
         gridHeight = Mathf.FloorToInt((maxPosition.y - minPosition.y) / nodeSize);
 
-        grid = new Node[gridWidth, gridHeight];
+        Grid = new Node[gridWidth, gridHeight];
 
         for(int i = 0; i < gridWidth; i++)
         {
             for(int j = 0; j < gridHeight; j++)
             {
-                // Use grid offset, because the grid is not starting from 0,0, but from the offset position
+                // Use Grid offset, because the Grid is not starting from 0,0, but from the offset position
                 Vector2 nodePosition = new Vector2(minPosition.x + i * nodeSize + nodeSize / 2, gridOffset + j * nodeSize + nodeSize / 2);
                 Vector2Int gridPosition = new Vector2Int(i, j);
                 bool isWalkable = CheckIfWalkable(nodePosition); // You can add logic to determine if the node is walkable
 
-                grid[i, j] = new Node(nodePosition, gridPosition, isWalkable);
+                Grid[i, j] = new Node(nodePosition, gridPosition, isWalkable);
             }
         }
     }
 
-    public Node GetNodeAtPosition(Vector2 position)
+    public bool TryGetNodePosition(Vector2 position, out Node node)
     {
         // Implementation for getting a node at a specific position
         int x = Mathf.FloorToInt((position.x - minPosition.x) / nodeSize);
@@ -51,26 +57,14 @@ public class GridBuilder : MonoBehaviour
         if(x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
         {
             //Debug.Log($"[GridBuilder] GetNodeAtPosition - x: {x}, y: {y}, position: {position}");
-            return grid[x, y];
+            node = Grid[x, y];
+            return true;
         }
 
         Debug.LogError($"[GridBuilder] GetNodeAtPosition - Position {position} is out of bounds!");
-        return grid[0, 0]; // Return the first node if the position is out of bounds
-    }
-
-    public void UpdateGrid()
-    {
-        if (grid == null) return;
-
-        for(int i = 0; i < gridWidth; i++)
-        {
-            for(int j = 0; j < gridHeight; j++)
-            {
-                Vector2 nodePosition = grid[i, j].position;
-                bool isWalkable = CheckIfWalkable(nodePosition);
-                grid[i, j] = new Node(nodePosition, new Vector2Int(i, j), isWalkable);
-            }
-        }
+        // Return the default node if the position is out of bounds
+        node = default;
+        return false; 
     }
 
     private bool CheckIfWalkable(Vector2 nodePosition)
@@ -84,6 +78,7 @@ public class GridBuilder : MonoBehaviour
         return true; // Placeholder implementation
     }
 
+    /*
     private void OnDrawGizmos()
     {
         if (minPosition == Vector2.zero || maxPosition == Vector2.zero) return;
@@ -108,5 +103,5 @@ public class GridBuilder : MonoBehaviour
                 Gizmos.DrawWireSphere(nodePosition, nodeSize * 0.35f);
             }
         }
-    }
+    }*/
 }

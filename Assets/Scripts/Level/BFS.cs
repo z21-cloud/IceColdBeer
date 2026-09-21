@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BFS : MonoBehaviour
+public class BFS
 {
      private List<Vector2Int> _directions = new List<Vector2Int>
     {
@@ -21,7 +20,6 @@ public class BFS : MonoBehaviour
             return true; // Return true if the start and target positions are the same
         }
         
-
         // Структура данных visitedNodes
         HashSet<Node> visitedNodes = new HashSet<Node>();
         // Структура данных toVisit
