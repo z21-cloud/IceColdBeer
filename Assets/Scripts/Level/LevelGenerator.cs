@@ -105,7 +105,6 @@ namespace IceColdBeer.Level
             // Initialize random seed for deterministic level generation before level generation
             UnityEngine.Random.InitState(_seed);
 
-
             GenerateLevel();
             Physics2D.SyncTransforms();
             _gridBuilder.BuildGrid(_spawnAreaBounds);
