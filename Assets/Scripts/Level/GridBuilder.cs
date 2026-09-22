@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class GridBuilder
 {
-    private readonly  float nodeSize;
+    private readonly float nodeSize;
     private readonly LayerMask unwalkableLayerMask;
 
-    // contsns
     private const float gridOffset = 0.25f; // Offset to adjust the Grid height
 
     private Vector2 minPosition;

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using IceColdBeer.Core;
 using IceColdBeer.Pools;
@@ -6,35 +5,19 @@ using UnityEngine;
 
 namespace IceColdBeer.Level
 {
-    public class LevelGenerator : MonoBehaviour, ICoinCounter
+    public class LevelGenerator : MonoBehaviour //, ICoinCounter
     {
-        //[NOTE]: numbers to data driven scriptable object for level generation
         [Header("Spawn Area")]
         [SerializeField] private SpriteRenderer _spawnArea;
-        [SerializeField] private float _borderOffset = 0.35f;
-        [SerializeField] private int _difficultyLevel = 0;
-        
-        [Header("Lose Holes")]
-        [SerializeField] private int _loseHoleCount = 10;
-        [SerializeField] private float _minDistanceBetweenLoseHoles = .25f;
-        
+
+        [Header("Generation Rules")]
+        [SerializeField] private GenerationRules _generationRules;
+
         [Header("Player Spawn Position")]
         [SerializeField] private Transform _playerSpawnPosition;
-        [SerializeField] private float _minDistanceBetweenPlayer = .25f;
-       
-        [Header("Win Hole")]
-        [SerializeField] private float _minDistanceBetweenWinHole = .25f;
-       
-        [Header("Coins")]
-        [SerializeField] private int _coinsCount = 2;
-        [SerializeField] private float _minDistanceBetweenCoins = 1f;
-        
-        [Header("Seed")]
-        [SerializeField] private int _seed = 0;
 
-        [Header("Grid Builder Parameters")]
-        [SerializeField] private float nodeSize = 1f;
-        [SerializeField] private LayerMask unwalkableLayerMask;
+        [Header("Object Types")]
+        [SerializeField] private ObjectType[] _objectTypes;
 
         // pools
         private CoinPool _coinPool;
@@ -43,9 +26,11 @@ namespace IceColdBeer.Level
 
         //
         private IScoreCounter _scoreCounter;
+
         //
         private BFS _bfs;
         private GridBuilder _gridBuilder;
+        private IsValidPosition _isValidPosition;
 
         // area bounds and spawned positions
         private Bounds _spawnAreaBounds;
@@ -57,15 +42,14 @@ namespace IceColdBeer.Level
         // private variables
         private float _currentMinYSpawnPosition = 0f;
 
-        // consts
-        private const float _minYSpawnPosition = 0.75f;
+        // public properties
+        // public int CoinsCount => _generationRules.CoinsCount;
 
-        public int CoinsCount => _coinsCount;
-
-        public void Initailize(HolePool loseHolePool, 
-                            CoinPool coinPool, 
-                            WinHolePool winHolePool, 
-                            IScoreCounter scoreCounter)
+        public void Initailize(
+            HolePool loseHolePool,
+            CoinPool coinPool,
+            WinHolePool winHolePool,
+            IScoreCounter scoreCounter)
         {
             _loseHolePool = loseHolePool;
             _coinPool = coinPool;
@@ -73,11 +57,18 @@ namespace IceColdBeer.Level
             _scoreCounter = scoreCounter;
 
             _bfs = new BFS();
-            _gridBuilder = new GridBuilder(nodeSize, unwalkableLayerMask);
+            _gridBuilder = new GridBuilder(_generationRules.GridBuilderConfig.NodeSize, _generationRules.GridBuilderConfig.UnwalkableLayerMask);
+            _isValidPosition = new IsValidPosition();
         }
 
         private void Awake()
         {
+            if (_generationRules.SpawnConfigs == null || _generationRules.GridBuilderConfig == null)
+            {
+                Debug.LogError($"[LevelGenerator] Generation Rules is not assigned!");
+                return;
+            }
+
             if (_spawnArea == null)
             {
                 Debug.LogError($"[LevelGenerator] Spawn Area is not assigned!");
@@ -90,29 +81,34 @@ namespace IceColdBeer.Level
                 return;
             }
 
-            if(_coinPool == null)
+            if (_coinPool == null)
             {
                 Debug.LogError($"[LevelGenerator] Coin Pool is not assigned!");
                 return;
             }
 
+            if (_winHolePool == null)
+            {
+                Debug.LogError($"[LevelGenerator] Win Hole Pool is not assigned!");
+                return;
+            }
 
             _spawnAreaBounds = _spawnArea.bounds;
 
             _spawnedPositionsCoins = new();
             _spawnedPositionsLoseHole = new();
             _goalPositions = new();
-            
+
             // Initialize random seed for deterministic level generation before level generation
-            UnityEngine.Random.InitState(_seed);
+            UnityEngine.Random.InitState(_generationRules.Seed);
 
             GenerateLevel();
             Physics2D.SyncTransforms();
             _gridBuilder.BuildGrid(_spawnAreaBounds);
-            
-            foreach(var goalPosition in _goalPositions)
+
+            foreach (var goalPosition in _goalPositions)
             {
-                if(IsPathAvailable(_playerSpawnPosition.position, goalPosition))
+                if (IsPathAvailable(_playerSpawnPosition.position, goalPosition))
                 {
                     Debug.Log($"[LevelGenerator] Path found between player and goal position: {goalPosition}");
                 }
@@ -126,17 +122,17 @@ namespace IceColdBeer.Level
         private bool IsPathAvailable(Vector3 playerPosition, Vector2 goalPosition)
         {
             Node startNode;
-            if(_gridBuilder.TryGetNodePosition(playerPosition, out startNode)) {}
-            
+            if (_gridBuilder.TryGetNodePosition(playerPosition, out startNode)) { }
+
             Node targetNode;
-            if(_gridBuilder.TryGetNodePosition(goalPosition, out targetNode)) {}
+            if (_gridBuilder.TryGetNodePosition(goalPosition, out targetNode)) { }
 
             Debug.Log($"[LG] start: {startNode.gridPosition} walkable={startNode.isWalkable} " + $"nodePos={startNode.position} playerPos={playerPosition}");
             Debug.Log($"[LG] target: {targetNode.gridPosition} walkable={targetNode.isWalkable} " + $"nodePos={targetNode.position} goalPos={goalPosition}");
 
             var nodes = _gridBuilder.Grid;
 
-            if(_bfs.FindPath(startNode, targetNode, nodes))
+            if (_bfs.FindPath(startNode, targetNode, nodes))
             {
                 Debug.Log($"[LevelGenerator] Path found between start and target nodes!");
                 return true;
@@ -159,10 +155,11 @@ namespace IceColdBeer.Level
         private void GenerateWinHole()
         {
             var winHole = _winHolePool.GetHole();
-            if(winHole != null)
+            if (winHole != null)
             {
-                _scoreCounter.Subscribe(winHole, _coinsCount);
-                winHole.transform.position = GetRandomPositionWinHole();
+                _scoreCounter.Subscribe(winHole, _generationRules.CoinsCount);
+                float yDifficultyOffset = ApplyDifficultyOffset(_generationRules.SpawnConfigs.DifficultyLevel);
+                winHole.transform.position = ObjectRandomPosition(ObjectType.WinHole, maxAttempts: 10000, yDifficultyOffset: yDifficultyOffset);
                 _winHolePosition = winHole.transform.position;
                 _goalPositions.Add(_winHolePosition);
             }
@@ -172,191 +169,89 @@ namespace IceColdBeer.Level
             }
         }
 
-        private Vector2 GetRandomPositionWinHole(int maxAttempts = 1000)
-        {
-            for (int i = 0; i < maxAttempts; i++)
-            {
-                float yDifficultyOffset = ApplyDifficultyOffset(_difficultyLevel);
-                Vector2 randomPosition = GenerateRandomPosition(yDifficultyOffset);
-                if (IsValidWinHolePosition(randomPosition))
-                {
-                    return randomPosition;
-                }
-            }
-
-            Debug.LogWarning($"[LevelGenerator] Could not find a valid position for win hole after {maxAttempts} attempts.");
-
-            return Vector2.zero;
-        }
-
         private float ApplyDifficultyOffset(int difficultyLevel)
         {
-            _currentMinYSpawnPosition = _minYSpawnPosition + (difficultyLevel * 0.5f);
-            _currentMinYSpawnPosition = Mathf.Clamp(_currentMinYSpawnPosition, _minYSpawnPosition, _spawnAreaBounds.max.y - _borderOffset);
+            _currentMinYSpawnPosition = _generationRules.SpawnConfigs.MinYSpawnPosition + (difficultyLevel * 0.5f);
+            _currentMinYSpawnPosition = Mathf.Clamp(_currentMinYSpawnPosition, _generationRules.SpawnConfigs.MinYSpawnPosition, _spawnAreaBounds.max.y - _generationRules.SpawnConfigs.BorderOffset);
             return _currentMinYSpawnPosition;
-        }
-
-        // Needs to check distance between player & win hole, because win hole generates first
-        private bool IsValidWinHolePosition(Vector2 position)
-        {
-            if (Vector2.Distance(position, _playerSpawnPosition.position) < _minDistanceBetweenPlayer)
-            {
-                return false;
-            }
-
-            return true;
         }
         #endregion
 
         #region GENERATOR:COIN POSITION
         private void GenerateCoins()
         {
-            for(int i = 0; i < _coinsCount; i++)
+            for (int i = 0; i < _generationRules.CoinsCount; i++)
             {
                 var coin = _coinPool.GetCoin();
-                if(coin != null)
+                if (coin != null)
                 {
-                    coin.transform.position = GetRandomPositionCoin();
+                    coin.transform.position = ObjectRandomPosition(ObjectType.Coin);
                     Vector2 coinPosition = coin.transform.position;
                     _spawnedPositionsCoins.Add(coinPosition);
                     _goalPositions.Add(coinPosition);
                 }
             }
         }
-
-        private Vector2 GetRandomPositionCoin(int maxAttempts = 1000)
-        {
-            for (int i = 0; i < maxAttempts; i++)
-            {
-                Vector2 randomPosition = GenerateRandomPosition(_minYSpawnPosition);
-                if (IsValidPositionCoin(randomPosition))
-                {
-                    return randomPosition;
-                }
-            }
-
-            Debug.LogWarning($"[LevelGenerator] Could not find a valid position for coin after {maxAttempts} attempts.");
-
-            return Vector2.zero;
-        }
-
-        // Need to check distance between player & win hole and other coins
-        private bool IsValidPositionCoin(Vector2 position)
-        {
-            if (Vector2.Distance(position, _playerSpawnPosition.position) < _minDistanceBetweenPlayer)
-            {
-                return false;
-            }
-
-            if(Vector2.Distance(position, _winHolePosition) < _minDistanceBetweenWinHole)
-            {
-                return false;
-            }
-
-            foreach (var spawnedCoinPosition in _spawnedPositionsCoins)
-            {
-                if (Vector2.Distance(position, spawnedCoinPosition) < _minDistanceBetweenCoins)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
         #endregion
 
         #region  GENERATOR:LOSE HOLE POSIION
         private void GenerateLoseHoles()
         {
-            for (int i = 0; i < _loseHoleCount; i++)
+            for (int i = 0; i < _generationRules.LoseHoleCount; i++)
             {
                 var hole = _loseHolePool.GetHole();
                 if (hole != null)
                 {
-                    hole.transform.position = GetRandomPositionLoseHole();
+                    hole.transform.position = ObjectRandomPosition(ObjectType.LoseHole);
                     _spawnedPositionsLoseHole.Add(hole.transform.position);
                 }
             }
         }
 
-        private Vector2 GetRandomPositionLoseHole(int maxAttempts = 1000)
+        #endregion
+
+        private Vector2 ObjectRandomPosition(ObjectType objectType, int maxAttempts = 10000, float yDifficultyOffset = 0f)
         {
+            float minYPosition = yDifficultyOffset == 0f ? _generationRules.SpawnConfigs.MinYSpawnPosition : yDifficultyOffset;
             for (int i = 0; i < maxAttempts; i++)
             {
-                Vector2 randomPosition = GenerateRandomPosition(_minYSpawnPosition);
-                if (IsValidPositionLoseHole(randomPosition))
+                Vector2 randomPosition = GenerateRandomPosition(minYPosition);
+                if (_isValidPosition.ObjectPosition(randomPosition, _playerSpawnPosition.position, _generationRules, objectType, _winHolePosition, _spawnedPositionsCoins, _spawnedPositionsLoseHole))
                 {
                     return randomPosition;
                 }
             }
 
-            Debug.LogWarning($"[LevelGenerator] Could not find a valid position for lose hole after {maxAttempts} attempts.");
-
+            Debug.LogWarning($"[LevelGenerator] Could not find a valid position for {objectType} after {maxAttempts} attempts.");
             return Vector2.zero;
         }
-
-        // Need to check distance between player, win hole, coins & other lose holes
-        // remove to separated script
-        private bool IsValidPositionLoseHole(Vector2 position)
-        {
-            if (Vector2.Distance(position, _playerSpawnPosition.position) < _minDistanceBetweenPlayer)
-            {
-                return false;
-            }
-
-            if(Vector2.Distance(position, _winHolePosition) < _minDistanceBetweenWinHole)
-            {
-                return false;
-            }
-
-            foreach (var spawnedCoinPosition in _spawnedPositionsCoins)
-            {
-                if (Vector2.Distance(position, spawnedCoinPosition) < _minDistanceBetweenCoins)
-                {
-                    return false;
-                }
-            }
-
-            foreach (var spawnedPosition in _spawnedPositionsLoseHole)
-            {
-                if (Vector2.Distance(position, spawnedPosition) < _minDistanceBetweenLoseHoles)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        #endregion
-
-        // gets random position inside bounderies + border offset\
-        // remove to separated script
-        private Vector2 GenerateRandomPosition(float minYPosition = _minYSpawnPosition)
+        
+        private Vector2 GenerateRandomPosition(float minYPosition = 0f)
         {
             float randomX = UnityEngine.Random.Range(
-                _spawnAreaBounds.min.x + _borderOffset,
-                _spawnAreaBounds.max.x - _borderOffset
+                _spawnAreaBounds.min.x + _generationRules.SpawnConfigs.BorderOffset,
+                _spawnAreaBounds.max.x - _generationRules.SpawnConfigs.BorderOffset
                 );
 
             float randomY = UnityEngine.Random.Range(
                 minYPosition,
-                _spawnAreaBounds.max.y - _borderOffset
+                _spawnAreaBounds.max.y - _generationRules.SpawnConfigs.BorderOffset
                 );
-        
+
             return new Vector2(randomX, randomY);
         }
 
         private void OnDrawGizmos()
         {
-            if(_gridBuilder == null) return;
-            
-            for(int i = 0; i < _gridBuilder.Grid.GetLength(0); i++)
+            if (_gridBuilder == null) return;
+
+            for (int i = 0; i < _gridBuilder.Grid.GetLength(0); i++)
             {
-                for(int j = 0; j < _gridBuilder.Grid.GetLength(1); j++)
+                for (int j = 0; j < _gridBuilder.Grid.GetLength(1); j++)
                 {
                     Node node = _gridBuilder.Grid[i, j];
                     Gizmos.color = node.isWalkable ? Color.green : Color.red;
-                    Gizmos.DrawWireSphere(node.position, nodeSize * 0.35f);
+                    Gizmos.DrawWireSphere(node.position, _generationRules.GridBuilderConfig.NodeSize * 0.35f);
                 }
             }
         }
