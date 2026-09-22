@@ -20,6 +20,11 @@ public class BFS
             return true;
         }
 
+        if(nodes == null)
+        {
+            return false;
+        }
+
         // visitedNodes — все клетки, которые уже были проверены или добавлены в очередь
         HashSet<Node> visitedNodes = new HashSet<Node>();
 
