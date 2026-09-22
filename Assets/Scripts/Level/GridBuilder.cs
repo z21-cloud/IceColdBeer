@@ -77,31 +77,4 @@ public class GridBuilder
 
         return true; // Placeholder implementation
     }
-
-    /*
-    private void OnDrawGizmos()
-    {
-        if (minPosition == Vector2.zero || maxPosition == Vector2.zero) return;
-
-        Gizmos.color = Color.green;
-
-        for(int i = 0; i < gridWidth; i++)
-        {
-            for(int j = 0; j < gridHeight; j++)
-            {
-                Vector2 nodePosition = new Vector2(minPosition.x + i * nodeSize + nodeSize / 2, gridOffset + j * nodeSize + nodeSize / 2);
-
-                if(CheckIfWalkable(nodePosition))
-                {
-                    Gizmos.color = Color.green; // Walkable nodes are green
-                }
-                else
-                {
-                    Gizmos.color = Color.red; // Non-walkable nodes are red
-                }
-
-                Gizmos.DrawWireSphere(nodePosition, nodeSize * 0.35f);
-            }
-        }
-    }*/
 }

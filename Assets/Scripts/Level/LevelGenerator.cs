@@ -101,6 +101,7 @@ namespace IceColdBeer.Level
 
             _spawnedPositionsCoins = new();
             _spawnedPositionsLoseHole = new();
+            _goalPositions = new();
             
             // Initialize random seed for deterministic level generation before level generation
             UnityEngine.Random.InitState(_seed);
@@ -343,6 +344,21 @@ namespace IceColdBeer.Level
                 );
         
             return new Vector2(randomX, randomY);
+        }
+
+        private void OnDrawGizmos()
+        {
+            if(_gridBuilder == null) return;
+            
+            for(int i = 0; i < _gridBuilder.Grid.GetLength(0); i++)
+            {
+                for(int j = 0; j < _gridBuilder.Grid.GetLength(1); j++)
+                {
+                    Node node = _gridBuilder.Grid[i, j];
+                    Gizmos.color = node.isWalkable ? Color.green : Color.red;
+                    Gizmos.DrawWireSphere(node.position, nodeSize * 0.35f);
+                }
+            }
         }
     }
 }
