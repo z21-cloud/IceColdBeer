@@ -1,0 +1,9 @@
+{
+    "name": "BFS-test",
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}

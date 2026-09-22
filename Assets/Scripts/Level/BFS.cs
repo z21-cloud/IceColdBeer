@@ -14,8 +14,6 @@ public class BFS
 
     public bool FindPath(Node startNode, Node targetNode, Node[,] nodes)
     {
-        if(nodes == null) return false;
-        
         // Если старт уже совпадает с целью, путь найден сразу
         if(startNode.gridPosition == targetNode.gridPosition)
         {
