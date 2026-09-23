@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using IceColdBeer.Core;
 using IceColdBeer.Pools;
@@ -19,6 +20,9 @@ namespace IceColdBeer.Level
         [Header("Object Types")]
         [SerializeField] private ObjectType[] _objectTypes;
 
+        [Header("Debug")]
+        [SerializeField] private bool _debugMode;
+
         // pools
         private CoinPool _coinPool;
         private HolePool _loseHolePool;
@@ -34,10 +38,10 @@ namespace IceColdBeer.Level
 
         // area bounds and spawned positions
         private Bounds _spawnAreaBounds;
+        private Vector2 _winHolePosition;
         private List<Vector2> _spawnedPositionsLoseHole;
         private List<Vector2> _spawnedPositionsCoins;
-        private Vector2 _winHolePosition;
-        private List<Vector2> _goalPositions;
+        private List<Goal> _goals;
 
         // private variables
         private float _currentMinYSpawnPosition = 0f;
@@ -97,7 +101,7 @@ namespace IceColdBeer.Level
 
             _spawnedPositionsCoins = new();
             _spawnedPositionsLoseHole = new();
-            _goalPositions = new();
+            _goals = new();
 
             // Initialize random seed for deterministic level generation before level generation
             UnityEngine.Random.InitState(_generationRules.Seed);
@@ -106,16 +110,62 @@ namespace IceColdBeer.Level
             Physics2D.SyncTransforms();
             _gridBuilder.BuildGrid(_spawnAreaBounds);
 
-            foreach (var goalPosition in _goalPositions)
+            List<Goal> invalidGoals = FindInvalidGoals();
+
+            if (invalidGoals.Count > 0)
             {
-                if (IsPathAvailable(_playerSpawnPosition.position, goalPosition))
+                Debug.LogWarning($"[Level Generator] Needs to regenerate for {invalidGoals.Count} objects");
+                RegenerateInvalidGoals(invalidGoals);
+                Physics2D.SyncTransforms();
+            }
+        }
+
+        private List<Goal> FindInvalidGoals()
+        {
+            List<Goal> invalids = new();
+            foreach (var goal in _goals)
+            {
+                if (IsPathAvailable(_playerSpawnPosition.position, goal.Position)) // goalPosition.Key is the position of the goal (win hole or coin)
                 {
-                    Debug.Log($"[LevelGenerator] Path found between player and goal position: {goalPosition}");
+                    if (_debugMode)
+                    {
+                        Debug.Log($"[LevelGenerator] Path found between player and goal position: {goal.Type} : {goal.Position}");
+                    }
                 }
                 else
                 {
-                    Debug.LogError($"[LevelGenerator] No path found between player and goal position: {goalPosition}");
+                    if (_debugMode)
+                    {
+                        Debug.LogError($"[LevelGenerator] No path found between player and goal position: {goal.Type} : {goal.Position}");
+                    }
+
+                    // if IsPathAvailable can't find path, add position & object type to _goalsInvalidPositions to regenerate invalid positions
+                    invalids.Add(goal);
                 }
+            }
+
+            return invalids;
+        }
+
+        private void RegenerateInvalidGoals(List<Goal> invalidGoals)
+        {
+            List<Goal> temp = new(invalidGoals);
+            int index = 0;
+            foreach (Goal tempGoal in temp)
+            {
+                for (int i = 0; i < 1000; i++)
+                {
+                    Vector2 rndPosition = ObjectRandomPosition(tempGoal.Type);
+                    if (IsPathAvailable(_playerSpawnPosition.position, rndPosition))
+                    {
+                        Debug.LogWarning($"[Level Generator] Regenerated new position succesfully {rndPosition}");
+                        var regeneratedGoal = invalidGoals[index];
+                        regeneratedGoal.Position = rndPosition;
+                        break;
+                    }
+                }
+
+                index++;
             }
         }
 
@@ -127,19 +177,28 @@ namespace IceColdBeer.Level
             Node targetNode;
             if (_gridBuilder.TryGetNodePosition(goalPosition, out targetNode)) { }
 
-            Debug.Log($"[LG] start: {startNode.gridPosition} walkable={startNode.isWalkable} " + $"nodePos={startNode.position} playerPos={playerPosition}");
-            Debug.Log($"[LG] target: {targetNode.gridPosition} walkable={targetNode.isWalkable} " + $"nodePos={targetNode.position} goalPos={goalPosition}");
+            if (_debugMode)
+            {
+                Debug.Log($"[LG] start: {startNode.gridPosition} walkable={startNode.isWalkable} " + $"nodePos={startNode.position} playerPos={playerPosition}");
+                Debug.Log($"[LG] target: {targetNode.gridPosition} walkable={targetNode.isWalkable} " + $"nodePos={targetNode.position} goalPos={goalPosition}");
+            }
 
             var nodes = _gridBuilder.Grid;
 
             if (_bfs.FindPath(startNode, targetNode, nodes))
             {
-                Debug.Log($"[LevelGenerator] Path found between start and target nodes!");
+                if (_debugMode)
+                {
+                    Debug.Log($"[LevelGenerator] Path found between start and target nodes!");
+                }
                 return true;
             }
             else
             {
-                Debug.LogError($"[LevelGenerator] No path found between start and target nodes!");
+                if (_debugMode)
+                {
+                    Debug.LogError($"[LevelGenerator] No path found between start and target nodes!");
+                }
                 return false;
             }
         }
@@ -161,11 +220,15 @@ namespace IceColdBeer.Level
                 float yDifficultyOffset = ApplyDifficultyOffset(_generationRules.SpawnConfigs.DifficultyLevel);
                 winHole.transform.position = ObjectRandomPosition(ObjectType.WinHole, maxAttempts: 10000, yDifficultyOffset: yDifficultyOffset);
                 _winHolePosition = winHole.transform.position;
-                _goalPositions.Add(_winHolePosition);
+                Goal newGoal = new(ObjectType.WinHole, _winHolePosition);
+                _goals.Add(newGoal);
             }
             else
             {
-                Debug.LogWarning($"[LevelGenerator] Win Hole Pool is empty, cannot generate win hole!");
+                if (_debugMode)
+                {
+                    Debug.LogWarning($"[LevelGenerator] Win Hole Pool is empty, cannot generate win hole!");
+                }
             }
         }
 
@@ -188,7 +251,8 @@ namespace IceColdBeer.Level
                     coin.transform.position = ObjectRandomPosition(ObjectType.Coin);
                     Vector2 coinPosition = coin.transform.position;
                     _spawnedPositionsCoins.Add(coinPosition);
-                    _goalPositions.Add(coinPosition);
+                    Goal newGoal = new(ObjectType.Coin, coinPosition);
+                    _goals.Add(newGoal);
                 }
             }
         }
@@ -210,6 +274,7 @@ namespace IceColdBeer.Level
 
         #endregion
 
+        #region GENERATOR:HELPER METHODS
         private Vector2 ObjectRandomPosition(ObjectType objectType, int maxAttempts = 10000, float yDifficultyOffset = 0f)
         {
             float minYPosition = yDifficultyOffset == 0f ? _generationRules.SpawnConfigs.MinYSpawnPosition : yDifficultyOffset;
@@ -222,10 +287,13 @@ namespace IceColdBeer.Level
                 }
             }
 
-            Debug.LogWarning($"[LevelGenerator] Could not find a valid position for {objectType} after {maxAttempts} attempts.");
+            if (_debugMode)
+            {
+                Debug.LogWarning($"[LevelGenerator] Could not find a valid position for {objectType} after {maxAttempts} attempts.");
+            }
             return Vector2.zero;
         }
-        
+
         private Vector2 GenerateRandomPosition(float minYPosition = 0f)
         {
             float randomX = UnityEngine.Random.Range(
@@ -241,9 +309,11 @@ namespace IceColdBeer.Level
             return new Vector2(randomX, randomY);
         }
 
+        #endregion
+
         private void OnDrawGizmos()
         {
-            if (_gridBuilder == null) return;
+            if (_gridBuilder == null || !_debugMode) return;
 
             for (int i = 0; i < _gridBuilder.Grid.GetLength(0); i++)
             {

@@ -1852,6 +1852,7 @@ MonoBehaviour:
   _generationRules: {fileID: 11400000, guid: 6aa8225ebb66c324bb2f7e52675394d0, type: 2}
   _playerSpawnPosition: {fileID: 694700101}
   _objectTypes: 000000000100000002000000
+  _debugMode: 1
 --- !u!4 &1403798322
 Transform:
   m_ObjectHideFlags: 0

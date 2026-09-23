@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: GenerationRules
   m_EditorClassIdentifier: Assembly-CSharp::GenerationRules
   _coinsCount: 2
-  _loseHoleCount: 10
+  _loseHoleCount: 11
   _minDistanceBetweenCoins: 1.5
   _minDistanceBetweenWinHole: 1.5
   _minDistanceBetweenPlayer: 1.5
   _minDistanceBetweenLoseHoles: 1.5
-  _seed: 1
+  _seed: 12345
   _gridBuilderConfig: {fileID: 11400000, guid: a14f01e1dd9b5fd4fbc07f1441890ba9, type: 2}
   _spawnConfigs: {fileID: 11400000, guid: ad8501b0140dd304083095644191e191, type: 2}
