@@ -3,11 +3,12 @@ using UnityEngine;
 public struct Goal
 {
     public ObjectType Type;
-    public Vector2 Position;
+    public Transform Transform;
+    public Vector2 Position => Transform.position;
 
-    public Goal(ObjectType type, Vector2 position)
+    public Goal(ObjectType type, Transform transform)
     {
         Type = type;
-        Position = position;
+        Transform = transform;
     }
 }
