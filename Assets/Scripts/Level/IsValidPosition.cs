@@ -3,31 +3,34 @@ using System.Collections.Generic;
 
 public class IsValidPosition
 {
-    public bool ObjectPosition(Vector2 objectRandomPosition, Vector2 playerSpawnPosition, GenerationRules generationRules, ObjectType objectType, 
-                                Vector2 winHolePosition = default, List<Vector2> spawnedPositionsCoins = null, List<Vector2> spawnedPositionsLoseHoles = null)
+    public bool ObjectPosition(Vector2 objectRandomPosition, Vector2 playerSpawnPosition, GenerationRules generationRules, ObjectType objectType,
+                           Vector2 winHolePosition, List<Vector2> spawnedPositionsCoins, List<Vector2> spawnedPositionsLoseHoles)
     {
-        if(objectType == ObjectType.WinHole)
+        if (objectType == ObjectType.WinHole)
         {
             return WinHolePosition(
                 objectRandomPosition,
                 playerSpawnPosition,
-                generationRules.MinDistanceBetweenPlayer);
+                generationRules.MinDistanceBetweenPlayer,
+                spawnedPositionsLoseHoles,
+                generationRules.MinDistanceBetweenLoseHoles);
         }
 
-        else if(objectType == ObjectType.Coin)
+        if (objectType == ObjectType.Coin)
         {
             return CoinPosition(
                 objectRandomPosition,
                 playerSpawnPosition,
                 winHolePosition,
                 spawnedPositionsCoins,
-
                 generationRules.MinDistanceBetweenPlayer,
                 generationRules.MinDistanceBetweenWinHole,
-                generationRules.MinDistanceBetweenCoins);
+                generationRules.MinDistanceBetweenCoins,
+                spawnedPositionsLoseHoles,
+                generationRules.MinDistanceBetweenLoseHoles);
         }
 
-        else if(objectType == ObjectType.LoseHole)
+        else if (objectType == ObjectType.LoseHole)
         {
             return LoseHolePosition(
                 objectRandomPosition,
@@ -41,15 +44,20 @@ public class IsValidPosition
                 generationRules.MinDistanceBetweenCoins,
                 generationRules.MinDistanceBetweenLoseHoles);
         }
-        // Implement logic for object position validation if needed
+        
         return false;
     }
 
-    private bool WinHolePosition(Vector2 spawnPosition, Vector2 playerSpawnPosition, float minDistanceBetweenPlayer)
+    private bool WinHolePosition(Vector2 spawnPosition, Vector2 playerSpawnPosition, float minDistanceBetweenPlayer, List<Vector2> spawnedPositionsLoseHoles = null, float minDistanceBetweenLoseHoles = 0f)
     {
         if (Vector2.Distance(spawnPosition, playerSpawnPosition) < minDistanceBetweenPlayer)
         {
             return false;
+        }
+
+        foreach (var pos in spawnedPositionsLoseHoles)
+        {
+            if (Vector2.Distance(spawnPosition, pos) < minDistanceBetweenLoseHoles) return false;
         }
 
         return true;
@@ -62,7 +70,9 @@ public class IsValidPosition
         List<Vector2> spawnedPositionsCoins,
         float minDistanceBetweenPlayer,
         float minDistanceBetweenWinHole,
-        float minDistanceBetweenCoins)
+        float minDistanceBetweenCoins,
+        List<Vector2> spawnedPositionsLoseHoles = null,
+        float minDistanceBetweenLoseHoles = 0f)
     {
         if (Vector2.Distance(spawnPosition, playerSpawnPosition) < minDistanceBetweenPlayer)
         {
@@ -80,6 +90,11 @@ public class IsValidPosition
             {
                 return false;
             }
+        }
+
+        foreach (var pos in spawnedPositionsLoseHoles)
+        {
+            if (Vector2.Distance(spawnPosition, pos) < minDistanceBetweenLoseHoles) return false;
         }
 
         return true;
