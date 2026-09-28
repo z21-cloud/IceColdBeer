@@ -148,7 +148,6 @@ namespace IceColdBeer.Level
 
         private void MoveGoal(Goal goal, Vector2 newPosition)
         {
-            Vector2 oldPosition = goal.Position;
             goal.Transform.position = newPosition;
 
             if(goal.Type == ObjectType.WinHole)
@@ -157,7 +156,7 @@ namespace IceColdBeer.Level
             }
             else if(goal.Type == ObjectType.Coin)
             {
-                int index = _spawnedPositionsCoins.IndexOf(oldPosition);
+                int index = goal.Index;
                 if(index >= 0) _spawnedPositionsCoins[index] = newPosition;
             }
         }
@@ -243,8 +242,12 @@ namespace IceColdBeer.Level
                 {
                     coin.transform.position = ObjectRandomPosition(ObjectType.Coin);
                     Vector2 coinPosition = coin.transform.position;
+                    
+                    // coinIndex before adding coin to list, because index starts at 0;
+                    int coinIndex = _spawnedPositionsCoins.Count;
                     _spawnedPositionsCoins.Add(coinPosition);
-                    Goal newGoal = new(ObjectType.Coin, coin.transform);
+                    
+                    Goal newGoal = new(ObjectType.Coin, coin.transform, coinIndex);
                     _goals.Add(newGoal);
                 }
             }
