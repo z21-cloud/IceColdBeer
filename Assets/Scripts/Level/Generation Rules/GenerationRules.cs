@@ -34,4 +34,9 @@ public class GenerationRules : ScriptableObject
 
     public GridBuilderConfig GridBuilderConfig => _gridBuilderConfig;
     public SpawnConfigs SpawnConfigs => _spawnConfigs;
+
+    public void SetSeed()
+    {
+        _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+    }
 }
